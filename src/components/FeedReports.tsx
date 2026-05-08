@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Filter, Search, Trash2, ShieldAlert, GraduationCap, Users, RefreshCw, X, FileText as FileTextIcon, ExternalLink } from "lucide-react";
 import { GlassCard } from "./GlassCard";
-import { collection, query, where, getDocs, addDoc, Timestamp, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, Timestamp, orderBy } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { motion, AnimatePresence } from "motion/react";
+import { saveLogToFirestore } from "../services/automationService";
 
 export function FeedReports() {
   const { user } = useAuth();
@@ -39,16 +40,34 @@ export function FeedReports() {
   const handleSimulateAnalysis = async () => {
     if (!user) return;
     setLoading(true);
-    const mockPosts = [
-      { userId: user.uid, author: "Jane Tech", type: "Technical", content: "Deep dive into React 19 concurrent features.", relevance: 98, url: "https://www.linkedin.com/feed/", createdAt: Timestamp.now() },
-      { userId: user.uid, author: "Startup Sam", type: "Motivational", content: "Why networking is the only skill that matters.", relevance: 45, url: "https://www.linkedin.com/feed/", createdAt: Timestamp.now() },
-      { userId: user.uid, author: "HR Global", type: "Hiring", content: "Opening for AI Research Scientist in Singapore.", relevance: 100, url: "https://www.linkedin.com/feed/", createdAt: Timestamp.now() },
-      { userId: user.uid, author: "Bot Account", type: "Toxic", content: "CRYPTO MOON 1000X JOIN TELEGRAM NOW!!!", relevance: 5, url: "https://www.linkedin.com/feed/", createdAt: Timestamp.now() },
+    
+    const authors = ["Jane Tech", "Startup Sam", "HR Global", "Bot Account", "Cloud Architect", "ML Researcher"];
+    const categories = ["Technical", "Motivational", "Hiring", "Toxic", "Technical", "Hiring"];
+    const contents = [
+      "Deep dive into React 19 concurrent features.",
+      "Why networking is the only skill that matters.",
+      "Opening for AI Research Scientist in Singapore.",
+      "CRYPTO MOON 1000X JOIN TELEGRAM NOW!!!",
+      "Deploying high-availability Postgres on Kubernetes.",
+      "Looking for LLM engineers with Jax experience."
     ];
+
+    const mockPosts = Array.from({ length: 3 }).map((_, i) => {
+      const idx = Math.floor(Math.random() * authors.length);
+      return { 
+        userId: user.uid, 
+        author: authors[idx], 
+        type: categories[idx] as any, 
+        content: contents[idx], 
+        relevance: 10 + Math.floor(Math.random() * 90), 
+        url: "https://www.linkedin.com/feed/", 
+        createdAt: Timestamp.now() 
+      };
+    });
 
     try {
       for (const post of mockPosts) {
-        await addDoc(collection(db, "logs"), post);
+        await saveLogToFirestore(user.uid, post);
       }
       await fetchLogs();
     } catch (err) {

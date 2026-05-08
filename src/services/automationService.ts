@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, serverTimestamp, limit } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -54,13 +54,56 @@ export async function analyzeLinkedInPost(postContent: string): Promise<PostAnal
 
 export async function saveLogToFirestore(userId: string, analysis: PostAnalysis) {
   try {
-    await addDoc(collection(db, "logs"), {
-      ...analysis,
-      userId,
-      createdAt: serverTimestamp()
-    });
+    // Check for duplicates (same content and author for this user)
+    const logsRef = collection(db, "logs");
+    const q = query(
+      logsRef, 
+      where("userId", "==", userId), 
+      where("content", "==", analysis.content),
+      where("author", "==", analysis.author),
+      limit(1)
+    );
+    const existing = await getDocs(q);
+    
+    if (existing.empty) {
+      await addDoc(logsRef, {
+        ...analysis,
+        userId,
+        createdAt: serverTimestamp()
+      });
+      return true;
+    }
+    return false;
   } catch (error) {
     console.error("Save log failed:", error);
+    return false;
+  }
+}
+
+export async function saveJobToFirestore(userId: string, job: any) {
+  try {
+    const jobsRef = collection(db, "jobs");
+    const q = query(
+      jobsRef,
+      where("userId", "==", userId),
+      where("title", "==", job.title),
+      where("company", "==", job.company),
+      limit(1)
+    );
+    const existing = await getDocs(q);
+
+    if (existing.empty) {
+      await addDoc(jobsRef, {
+        ...job,
+        userId,
+        createdAt: serverTimestamp()
+      });
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error("Save job failed:", error);
+    return false;
   }
 }
 

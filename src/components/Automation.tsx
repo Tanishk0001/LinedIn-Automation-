@@ -13,7 +13,7 @@ import {
   ExternalLink
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { analyzeLinkedInPost, MOCK_FEED, PostAnalysis } from "../services/automationService";
+import { analyzeLinkedInPost, MOCK_FEED, PostAnalysis, saveLogToFirestore } from "../services/automationService";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Automation() {
@@ -94,10 +94,22 @@ export function Automation() {
       await new Promise(r => setTimeout(r, 1500));
       
       addLog(`EXTRACT: Found DOM candidate [post_id_${i + 1}]`);
-      const analysis = await analyzeLinkedInPost(MOCK_FEED[i % MOCK_FEED.length]);
+      // Simulating variety by random selection from mock feed
+      const rawContent = MOCK_FEED[Math.floor(Math.random() * MOCK_FEED.length)];
+      const analysis = await analyzeLinkedInPost(rawContent);
       
       addLog(`ANALYSIS: [${analysis.type}] Relevance: ${analysis.relevance}%`);
-      setDiscoveredPosts(prev => [analysis, ...prev]);
+      
+      if (user) {
+        const isNew = await saveLogToFirestore(user.uid, analysis);
+        if (isNew) {
+          setDiscoveredPosts(prev => [analysis, ...prev]);
+          addLog(`SUCCESS: Persistent intel saved to secure account vault.`);
+        } else {
+          addLog(`DUPLICATE: Intelligence already exists. Analysis skipped.`);
+        }
+      }
+      
       await auditEvent("DATA_EXTRACTED", analysis);
     }
   };
