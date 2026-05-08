@@ -41,7 +41,7 @@ export function Home() {
             <div className="h-8 w-8 bg-[#0077b5] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(0,119,181,0.5)]">
               <Linkedin className="h-5 w-5 text-white fill-white/10" />
             </div>
-            <span className="font-display font-black text-xl tracking-tighter">LI-INTEL</span>
+            <span className="font-display font-black text-xl tracking-tighter">LINKEDIN AUTOMATION TOOL</span>
             <span className="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded ml-2 text-gray-500 font-mono tracking-widest">v4.2.0</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">
@@ -72,8 +72,8 @@ export function Home() {
             </div>
             
             <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-[0.9] mb-8">
-              AUTONOMOUS <br />
-              <span className="text-[#0077b5]">LINKEDIN AGENT</span>
+              LINKEDIN <br />
+              <span className="text-[#0077b5]">AUTOMATION TOOL</span>
             </h1>
             
             <p className="max-w-xl mx-auto text-lg text-gray-500 font-medium leading-relaxed mb-12">
@@ -104,7 +104,7 @@ export function Home() {
                 </AnimatePresence>
               </div>
               <div className="flex flex-col items-start px-6 border-l border-white/10">
-                <span className="text-2xl font-display font-black">12.4K</span>
+                <span className="text-2xl font-display font-black">1</span>
                 <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Active Deployments</span>
               </div>
             </div>
